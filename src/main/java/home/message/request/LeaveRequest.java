@@ -46,4 +46,10 @@ public class LeaveRequest {
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
+
+    @Override
+    public String toString() {
+        return "LEAVE;" + ipAddress + ";" + String.valueOf(port) + ";" + String.valueOf(timestamp);
+    }
+
 }

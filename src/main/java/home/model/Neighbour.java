@@ -1,9 +1,17 @@
 package home.model;
 
+import home.api.Endpoint;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class Neighbour {
+    /*
+        Neighbour
+        =========
+        Represent a neighbour node in the circle
+     */
+
 
     private static List<Neighbour> neighbours = new ArrayList<>();
 
@@ -25,7 +33,7 @@ public class Neighbour {
 
     public static void addNeighbour(Neighbour neighbour) {
         /*
-            Add neighbour
+            Add neighbour to the circle
          */
 
         if(!neighbours.contains(neighbour)) {
@@ -33,11 +41,56 @@ public class Neighbour {
         }
     }
 
+    public static void removeNeighbour(Neighbour neighbour) {
+        /*
+            Remove neighbour from the circle
+         */
+
+        int i = 0;
+        while(i < neighbours.size()) {
+            if(neighbours.get(i).ipAddress.equals(neighbour.ipAddress) && neighbours.get(i).port == neighbour.port) {
+                break;
+            }
+            i++;
+        }
+        neighbours.remove(i);
+    }
+
     public static List<Neighbour> getNeighbours() {
         /*
-            Get neighbours
+            Get neighbours in the circle
         */
 
         return neighbours;
     }
+
+    public static boolean hasNeighbour(Neighbour neighbour) {
+        /*
+            Check whether a given neighbour exits within the circle
+         */
+
+        for(Neighbour n: neighbours) {
+            if(n.ipAddress.equals(neighbour.ipAddress) && n.port == neighbour.port) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return "@" + ipAddress + ":" + String.valueOf(port);
+    }
+
+    public static void display() {
+        System.out.println("> Neighbours");
+        System.out.println("------------");
+        for(Neighbour neighbour: neighbours) {
+            System.out.println(neighbour.toString());
+        }
+        System.out.println();
+    }
+
+
 }

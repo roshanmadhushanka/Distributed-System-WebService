@@ -46,4 +46,10 @@ public class JoinRequest {
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
+
+    @Override
+    public String toString() {
+        return "JOIN;" + ipAddress + ";" + String.valueOf(port) + ";" + String.valueOf(timestamp);
+    }
+
 }

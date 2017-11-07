@@ -6,6 +6,12 @@ import java.io.IOException;
 import java.net.*;
 
 public class BootstrapConnection {
+    /*
+        BootstrapConnection
+        ===================
+        Handle the interaction between bootstrap server and the system
+     */
+
     private DatagramSocket socket = null;
 
     public BootstrapConnection() {
@@ -24,9 +30,6 @@ public class BootstrapConnection {
         /*
             Send message to the network
          */
-
-        System.out.println("Sending : " + message + " to " + Configuration.getBsIpAddress() + " " +
-                Configuration.getBsPort());
 
         String response = "Error";
 
@@ -57,6 +60,7 @@ public class BootstrapConnection {
         } catch (SocketException e) {
             System.err.println("Socket exception: Connection.class send");
         } catch (IOException e) {
+            e.printStackTrace();
             System.err.println("IO exception: Connection.class send");
         }
 
