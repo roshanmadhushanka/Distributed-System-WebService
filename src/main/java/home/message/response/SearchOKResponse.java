@@ -80,7 +80,13 @@ public class SearchOKResponse {
 
     @Override
     public String toString() {
+        String files = "[]";
+
+        if(fileNames != null) {
+            files = Arrays.toString(fileNames.toArray());
+        }
+
         return "SEARCHOK;" + ipAddress + ";" + String.valueOf(port) + ";" + String.valueOf(value) + ";" +
-                String.valueOf(timestamp) + ";" + query + ";" + Arrays.toString(fileNames.toArray());
+                String.valueOf(timestamp) + ";" + query + ";" + files;
     }
 }

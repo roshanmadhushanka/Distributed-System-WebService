@@ -1,6 +1,6 @@
 package home;
 
-import home.simulation.RandomQueryGenerator;
+import home.gui.Main;
 import home.system.Configuration;
 import home.table.FileTable;
 import org.springframework.boot.SpringApplication;
@@ -29,7 +29,8 @@ public class DSClientApp {
 //        RandomQueryGenerator randomQueryGenerator = new RandomQueryGenerator();
 //        randomQueryGenerator.start();
 
-        System.out.println(System.getProperty("user.dir"));
+        Main.getForm().setVisible(true);
+
         SpringApplication.run(DSClientApp.class, args);
     }
 }

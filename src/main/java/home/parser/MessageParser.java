@@ -2,6 +2,7 @@ package home.parser;
 
 import home.api.JoinEndpoint;
 import home.api.LeaveEndpoint;
+import home.gui.Main;
 import home.io.CommunityConnection;
 import home.message.request.JoinRequest;
 import home.message.request.LeaveRequest;
@@ -21,6 +22,11 @@ public class MessageParser {
         }
 
         String[] message = response.split(" ");
+
+        // GUI
+        Main.getForm().appendTerminal(response);
+        System.out.println(response);
+
         if(message[1].equals("REGOK")) {
             // Register to bootstrap
             int value = Integer.parseInt(message[2]);
@@ -149,9 +155,6 @@ public class MessageParser {
         /*
             Unregister user from the bootstrap server and circle
          */
-
-        // Store neighbour node details
-        Neighbour neighbour = new Neighbour(message[3], Integer.parseInt(message[4]));
 
         // Load system communication configurations
         String systemIPAddress = Configuration.getSystemIPAddress();

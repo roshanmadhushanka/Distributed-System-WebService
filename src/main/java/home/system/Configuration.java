@@ -77,17 +77,17 @@ public class Configuration {
 
         Properties props = new EncryptableProperties(encryptor);
 
-        // Load properties
-        props.load(new FileInputStream(System.getProperty("user.dir") + "/src/main/resources/" +
-                "application.properties"));
+//        // Load properties
+//        props.load(new FileInputStream(System.getProperty("user.dir") + "/src/main/resources/" +
+//                "application.properties"));
 
         // Build configurations
         props.load(new FileInputStream(System.getProperty("user.dir") + "/" +
                 "application.properties"));
 
-//        // Set properties
-//        setSystemName(props.getProperty("server.name"));
-//        setSystemIPAddress(props.getProperty("server.host"));
+        // Set properties
+        setSystemName(props.getProperty("server.name"));
+        setSystemIPAddress(props.getProperty("server.host"));
 
 //        String host = InetAddress.getLocalHost().getHostAddress();
 //        setSystemIPAddress(host);

@@ -8,6 +8,7 @@ import home.api.SearchEndpoint;
 import home.api.SearchOKEndpoint;
 import home.buffers.MessageBuffer;
 import home.buffers.SearchBuffer;
+import home.gui.Main;
 import home.io.BootstrapConnection;
 import home.io.CommunityConnection;
 import home.message.request.*;
@@ -24,6 +25,8 @@ import org.bson.Document;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -140,6 +143,10 @@ public class DSClientController {
         // Send join ok response to the target client
         response = communityConnection.joinOK(joinOKResponse, joinOKEndpoint);
 
+        // GUI
+        Main.getForm().appendTerminal(joinRequest.toString());
+        Main.getForm().appendNeighbour(neighbour);
+
         return new ResponseEntity(response, HttpStatus.OK);
     }
 
@@ -229,6 +236,7 @@ public class DSClientController {
                         searchOKResponse.setValue(0);
                         searchOKResponse.setIpAddress(systemIpAddress);
                         searchOKResponse.setPort(systemPort);
+                        searchOKResponse.setFileNames(new ArrayList<>());
 
                         // Create search ok endpoint to the target client
                         SearchOKEndpoint searchOKEndpoint = new SearchOKEndpoint(searchRequest.getIpAddress(),
@@ -271,6 +279,9 @@ public class DSClientController {
 
         response = "ACK";
 
+        // GUI
+        Main.getForm().appendTerminal(searchRequest.toString());
+
         return new ResponseEntity(response, HttpStatus.OK);
     }
 
@@ -309,6 +320,9 @@ public class DSClientController {
 
         response = "ACK";
 
+        // GUI
+        Main.getForm().appendTerminal(leaveRequest.toString());
+
         return new ResponseEntity(response, HttpStatus.OK);
     }
 
@@ -342,6 +356,10 @@ public class DSClientController {
         Neighbour neighbour = new Neighbour(joinOKResponse.getIpAddress(), joinOKResponse.getPort());
         Neighbour.addNeighbour(neighbour);
 
+        // GUI
+        Main.getForm().appendTerminal(joinOKResponse.toString());
+        Main.getForm().appendNeighbour(neighbour);
+
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -370,6 +388,11 @@ public class DSClientController {
             // Add search OK Response to buffer
             SearchBuffer.put(searchOKResponse);
         }
+
+        // GUI
+        Main.getForm().appendTerminal(searchOKResponse.toString());
+        Main.getForm().appendSearch(searchOKResponse);
+
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -386,6 +409,9 @@ public class DSClientController {
 
         Neighbour neighbour = new Neighbour(leaveOKResponse.getIpAddress(), leaveOKResponse.getPort());
         Neighbour.removeNeighbour(neighbour);
+
+        // GUI
+        Main.getForm().appendTerminal(leaveOKResponse.toString());
 
         return new ResponseEntity(HttpStatus.OK);
     }
