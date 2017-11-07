@@ -232,7 +232,7 @@ public class DSClientController {
                         // Generate file not found response
                         SearchOKResponse searchOKResponse = new SearchOKResponse();
                         searchOKResponse.setQuery(searchRequest.getFileName());
-                        searchOKResponse.setTimestamp(searchOKResponse.getTimestamp());
+                        searchOKResponse.setTimestamp(searchRequest.getTimestamp());
                         searchOKResponse.setValue(0);
                         searchOKResponse.setIpAddress(systemIpAddress);
                         searchOKResponse.setPort(systemPort);
