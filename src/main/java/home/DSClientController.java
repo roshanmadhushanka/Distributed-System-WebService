@@ -392,6 +392,7 @@ public class DSClientController {
         // GUI
         Main.getForm().appendTerminal(searchOKResponse.toString());
         Main.getForm().appendSearch(searchOKResponse);
+        Main.getForm().updateFileDestinations();
 
         return new ResponseEntity(HttpStatus.OK);
     }

@@ -52,4 +52,11 @@ public class FileToLocationTable {
         }
     }
 
+    public static HashMap<String, List<Neighbour>> getFileToLocation() {
+        /*
+            Get file to location table
+         */
+
+        return fileToLocation;
+    }
 }

@@ -18,26 +18,25 @@ import home.system.Configuration;
 import home.table.FileTable;
 import home.table.FileToLocationTable;
 
-import javax.swing.DefaultListModel;
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Vector;
 
 /**
  *
  * @author roshanalwis
  */
 public class Main extends javax.swing.JFrame {
-    DefaultTableModel searchTableModel;
+    /**
+     * Creates new form Main
+     */
+
     DefaultListModel terminalListModel;
     DefaultListModel neighbourListModel;
     DefaultListModel fileListModel;
 
-    /**
-     * Creates new form Main
-     */
     private static Main form;
 
     public static Main getForm() {
@@ -51,6 +50,10 @@ public class Main extends javax.swing.JFrame {
     private Main() {
         initComponents();
 
+        // Initialize tables
+        ((DefaultTableModel) tblFileDestinations.getModel()).setRowCount(0);
+        ((DefaultTableModel) tblSearchResult.getModel()).setRowCount(0);
+
         // Load system configurations
         updateSystemInfo(Configuration.getSystemName(),
                 Configuration.getBsIpAddress(),
@@ -61,7 +64,7 @@ public class Main extends javax.swing.JFrame {
     }
 
     public void appendSearch(SearchOKResponse searchOKResponse) {
-        searchTableModel = (DefaultTableModel) tblSearchResult.getModel();
+        DefaultTableModel searchTableModel = (DefaultTableModel) tblSearchResult.getModel();
         searchTableModel.addRow(new Object[]{searchOKResponse.getTimestamp(),
                 searchOKResponse.getIpAddress(),
                 searchOKResponse.getPort(),
@@ -83,6 +86,20 @@ public class Main extends javax.swing.JFrame {
         txtSystemPort.setText(port);
     }
 
+    public void updateFileDestinations() {
+        DefaultTableModel fileDestinationTableModel = (DefaultTableModel) tblFileDestinations.getModel();
+        fileDestinationTableModel.setRowCount(0);
+
+        HashMap<String, List<Neighbour>> fileToLocation = FileToLocationTable.getFileToLocation();
+        for(String file: fileToLocation.keySet()) {
+            for(Neighbour neighbour: fileToLocation.get(file)) {
+                fileDestinationTableModel.addRow(new Object[]{file,
+                        Arrays.toString(new String[]{neighbour.getIpAddress(), String.valueOf(neighbour.getPort())})});
+            }
+        }
+    }
+
+
     public void updateFiles() {
         List<String> files = FileTable.getFileList();
         for(String file: files) {
@@ -99,7 +116,6 @@ public class Main extends javax.swing.JFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() {
-        searchTableModel = new DefaultTableModel();
         terminalListModel = new DefaultListModel();
         neighbourListModel = new DefaultListModel();
         fileListModel = new DefaultListModel();
@@ -107,7 +123,7 @@ public class Main extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        tblSearchResult = new javax.swing.JTable(searchTableModel);
+        tblSearchResult = new javax.swing.JTable();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         lstTerminal = new javax.swing.JList<>(terminalListModel);
@@ -130,6 +146,9 @@ public class Main extends javax.swing.JFrame {
         jPanel8 = new javax.swing.JPanel();
         jScrollPane4 = new javax.swing.JScrollPane();
         lstFiles = new javax.swing.JList<>(fileListModel);
+        jPanel9 = new javax.swing.JPanel();
+        jScrollPane6 = new javax.swing.JScrollPane();
+        tblFileDestinations = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -143,7 +162,7 @@ public class Main extends javax.swing.JFrame {
         );
         jPanel1Layout.setVerticalGroup(
                 jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 81, Short.MAX_VALUE)
+                        .addGap(0, 0, Short.MAX_VALUE)
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Search Results"));
@@ -165,15 +184,15 @@ public class Main extends javax.swing.JFrame {
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
                 jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addContainerGap()
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 487, Short.MAX_VALUE)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 765, Short.MAX_VALUE)
                                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
                 jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 426, Short.MAX_VALUE)
                                 .addContainerGap())
         );
 
@@ -187,14 +206,14 @@ public class Main extends javax.swing.JFrame {
                 jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addContainerGap()
-                                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 286, Short.MAX_VALUE)
+                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
                 jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addContainerGap()
-                                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 151, Short.MAX_VALUE)
+                                .addComponent(jScrollPane3)
                                 .addContainerGap())
         );
 
@@ -261,7 +280,8 @@ public class Main extends javax.swing.JFrame {
         jPanel5Layout.setVerticalGroup(
                 jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 146, Short.MAX_VALUE)
+                                .addContainerGap()
+                                .addComponent(jScrollPane2)
                                 .addContainerGap())
         );
 
@@ -319,7 +339,7 @@ public class Main extends javax.swing.JFrame {
                                 .addContainerGap()
                                 .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 371, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnSearch, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnSearch, javax.swing.GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE)
                                 .addContainerGap())
         );
         jPanel7Layout.setVerticalGroup(
@@ -329,7 +349,7 @@ public class Main extends javax.swing.JFrame {
                                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                         .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addComponent(btnSearch))
-                                .addContainerGap(35, Short.MAX_VALUE))
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel8.setBorder(javax.swing.BorderFactory.createTitledBorder("Files"));
@@ -342,7 +362,7 @@ public class Main extends javax.swing.JFrame {
                 jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel8Layout.createSequentialGroup()
                                 .addContainerGap()
-                                .addComponent(jScrollPane4)
+                                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 326, Short.MAX_VALUE)
                                 .addContainerGap())
         );
         jPanel8Layout.setVerticalGroup(
@@ -352,6 +372,38 @@ public class Main extends javax.swing.JFrame {
                                 .addContainerGap())
         );
 
+        jPanel9.setBorder(javax.swing.BorderFactory.createTitledBorder("File Destinations"));
+
+        tblFileDestinations.setModel(new javax.swing.table.DefaultTableModel(
+                new Object [][] {
+                        {null, null},
+                        {null, null},
+                        {null, null},
+                        {null, null}
+                },
+                new String [] {
+                        "File Name", "Destinations"
+                }
+        ));
+        jScrollPane6.setViewportView(tblFileDestinations);
+
+        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
+        jPanel9.setLayout(jPanel9Layout);
+        jPanel9Layout.setHorizontalGroup(
+                jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel9Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel9Layout.setVerticalGroup(
+                jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel9Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(17, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -359,9 +411,7 @@ public class Main extends javax.swing.JFrame {
                         .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                         .addGroup(layout.createSequentialGroup()
-                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                                        .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                         .addGroup(layout.createSequentialGroup()
@@ -369,16 +419,21 @@ public class Main extends javax.swing.JFrame {
                                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                                         .addGroup(layout.createSequentialGroup()
-                                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                                        .addComponent(jPanel6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                                .addGap(7, 7, 7)
                                                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                                                         .addGroup(layout.createSequentialGroup()
-                                                                                .addGap(235, 235, 235)
-                                                                                .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                                                        .addGroup(layout.createSequentialGroup()
+                                                                                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                                                .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))))
+                                                                                .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                                .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                                        .addGroup(layout.createSequentialGroup()
+                                                                                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                                .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                                .addGap(0, 0, Short.MAX_VALUE)))))))
                                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -387,13 +442,14 @@ public class Main extends javax.swing.JFrame {
                                 .addContainerGap()
                                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                         .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                         .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -443,44 +499,51 @@ public class Main extends javax.swing.JFrame {
         MessageParser.responseParser(response);
     }
 
+    private void search(String fileName) {
+        // Load neighbours
+        List<Neighbour> neighbours = Neighbour.getNeighbours();
+
+        // Check file to locations for existing search results
+        if(FileToLocationTable.hasLocation(fileName)) {
+            for(Neighbour n: FileToLocationTable.getLocations(fileName)) {
+                neighbours.add(0, n);
+            }
+        }
+
+        // Load system communication configurations
+        String systemIPAddress = Configuration.getSystemIPAddress();
+        int systemPort = Configuration.getSystemPort();
+
+        // Initiate search request
+        SearchRequest searchRequest = new SearchRequest(systemIPAddress, systemPort, fileName);
+
+        // Establish connection with the community
+        CommunityConnection communityConnection = new CommunityConnection();
+
+        for(Neighbour neighbour: neighbours) {
+            // Create an endpoint to the target neighbour
+            SearchEndpoint searchEndpoint = new SearchEndpoint(neighbour.getIpAddress(),
+                    neighbour.getPort());
+            try {
+                communityConnection.search(searchRequest, searchEndpoint);
+            } catch (org.springframework.web.client.ResourceAccessException e) {
+
+            }
+        }
+    }
+
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {
         String fileName = txtSearch.getText();
 
         List<String> files = FileTable.search(fileName);
         if(files.size() == 0) {
-
-            // Load neighbours
-            List<Neighbour> neighbours = Neighbour.getNeighbours();
-
-            // Check file to locations for existing search results
-            if(FileToLocationTable.hasLocation(fileName)) {
-                for(Neighbour n: FileToLocationTable.getLocations(fileName)) {
-                    neighbours.add(0, n);
-                }
-            }
-
-            // Load system communication configurations
-            String systemIPAddress = Configuration.getSystemIPAddress();
-            int systemPort = Configuration.getSystemPort();
-
-            // Initiate search request
-            SearchRequest searchRequest = new SearchRequest(systemIPAddress, systemPort, fileName);
-
-            // Establish connection with the community
-            CommunityConnection communityConnection = new CommunityConnection();
-
-            for(Neighbour neighbour: neighbours) {
-                // Create an endpoint to the target neighbour
-                SearchEndpoint searchEndpoint = new SearchEndpoint(neighbour.getIpAddress(),
-                        neighbour.getPort());
-                try {
-                    communityConnection.search(searchRequest, searchEndpoint);
-                } catch (org.springframework.web.client.ResourceAccessException e) {
-
-                }
-            }
+            search(fileName);
         } else {
-            System.out.println("Files : " + Arrays.toString(files.toArray()));
+            if (JOptionPane.showConfirmDialog(null, "Following file(s) already in your system "
+                            + Arrays.toString(files.toArray()) + "\n Do you wish to continue?", "Confirm",
+                    JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                search(fileName);
+            }
         }
     }
 
@@ -534,13 +597,16 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
+    private javax.swing.JPanel jPanel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JList<String> lstFiles;
     private javax.swing.JList<String> lstNeighbours;
     private javax.swing.JList<String> lstTerminal;
+    private javax.swing.JTable tblFileDestinations;
     private javax.swing.JTable tblSearchResult;
     private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtSystemIPAddress;
