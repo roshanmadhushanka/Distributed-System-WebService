@@ -172,83 +172,7 @@ public class DSClientController {
             // Run search query in file table
             List<String> fileList = FileTable.search(fileName);
 
-            if(fileList.size() == 0) {
-                // File is not available int the system
-                int hops = searchRequest.getHops();
-
-                // Generate forward request
-                SearchRequest forwardRequest = new SearchRequest();
-                forwardRequest.setFileName(searchRequest.getFileName());
-                forwardRequest.setIpAddress(searchRequest.getIpAddress());
-                forwardRequest.setPort(searchRequest.getPort());
-                forwardRequest.setTimestamp(searchRequest.getTimestamp());
-
-                // Load neighbours
-                List<Neighbour> neighbours = Neighbour.getNeighbours();
-
-                // Check file to locations for existing search results
-                if(FileToLocationTable.hasLocation(searchRequest.getFileName())) {
-                    for(Neighbour n: FileToLocationTable.getLocations(searchRequest.getFileName())) {
-                        neighbours.add(0, n);
-                    }
-                }
-
-                // Remove originator
-                Neighbour originator = new Neighbour(searchRequest.getIpAddress(), searchRequest.getPort());
-                neighbours.remove(originator);
-
-                // Establish connection with the community
-                CommunityConnection communityConnection = new CommunityConnection();
-
-                for(Neighbour neighbour: neighbours) {
-                    if (hops > 0) {
-                        // Forward search request to neighbours within the circle
-
-                        // Update hops count
-                        --hops;
-                        forwardRequest.setHops(hops);
-
-                        // Create an endpoint to the target neighbour
-                        SearchEndpoint searchEndpoint = new SearchEndpoint(neighbour.getIpAddress(),
-                                neighbour.getPort());
-
-                        // Forward search request to the community
-                        try {
-                            communityConnection.search(forwardRequest, searchEndpoint);
-                        } catch (org.springframework.web.client.ResourceAccessException e) {
-                            // Update file to location table
-                            FileToLocationTable.removeLocation(fileName, neighbour);
-
-                            // Update neighbours
-                            Neighbour.removeNeighbour(neighbour);
-                        }
-                    } else {
-                        // Hops count limit exceeded, send file not found message
-
-                        // Load system communication configurations
-                        String systemIpAddress = Configuration.getSystemIPAddress();
-                        int systemPort = Configuration.getSystemPort();
-
-                        // Generate file not found response
-                        SearchOKResponse searchOKResponse = new SearchOKResponse();
-                        searchOKResponse.setQuery(searchRequest.getFileName());
-                        searchOKResponse.setTimestamp(searchRequest.getTimestamp());
-                        searchOKResponse.setValue(0);
-                        searchOKResponse.setIpAddress(systemIpAddress);
-                        searchOKResponse.setPort(systemPort);
-                        searchOKResponse.setFileNames(new ArrayList<>());
-
-                        // Create search ok endpoint to the target client
-                        SearchOKEndpoint searchOKEndpoint = new SearchOKEndpoint(searchRequest.getIpAddress(),
-                                searchRequest.getPort());
-
-                        // Send response to the client
-                        response = communityConnection.searchOK(searchOKResponse, searchOKEndpoint);
-
-                        break;
-                    }
-                }
-            } else {
+            if(fileList.size() != 0) {
                 // Search OK, send results
 
                 // Load system communication configurations
@@ -274,6 +198,74 @@ public class DSClientController {
 
                 // Send response to the client
                 response = communityConnection.searchOK(searchOKResponse, searchOKEndpoint);
+            }
+
+            // File is not available int the system
+            int hops = searchRequest.getHops();
+
+            // Generate forward request
+            SearchRequest forwardRequest = new SearchRequest();
+            forwardRequest.setFileName(searchRequest.getFileName());
+            forwardRequest.setIpAddress(searchRequest.getIpAddress());
+            forwardRequest.setPort(searchRequest.getPort());
+            forwardRequest.setTimestamp(searchRequest.getTimestamp());
+
+            // Load neighbours
+            List<Neighbour> neighbours = Neighbour.getNeighbours();
+
+            // Check file to locations for existing search results
+            if(FileToLocationTable.hasLocation(searchRequest.getFileName())) {
+                for(Neighbour n: FileToLocationTable.getLocations(searchRequest.getFileName())) {
+                    neighbours.add(0, n);
+                }
+            }
+
+            // Remove originator
+            Neighbour originator = new Neighbour(searchRequest.getIpAddress(), searchRequest.getPort());
+            neighbours.remove(originator);
+
+            // Establish connection with the community
+            CommunityConnection communityConnection = new CommunityConnection();
+
+            boolean hasNeighbours = false;
+            for(Neighbour neighbour: neighbours) {
+                if (hops > 0) {
+                    // Forward search request to neighbours within the circle
+
+                    // Update hops count
+                    --hops;
+                    forwardRequest.setHops(hops);
+
+                    // Create an endpoint to the target neighbour
+                    SearchEndpoint searchEndpoint = new SearchEndpoint(neighbour.getIpAddress(),
+                            neighbour.getPort());
+
+                    response = communityConnection.search(forwardRequest, searchEndpoint);
+                    System.out.println("search" + response);
+                } else {
+                    // Hops count limit exceeded, send file not found message
+
+                    // Load system communication configurations
+                    String systemIpAddress = Configuration.getSystemIPAddress();
+                    int systemPort = Configuration.getSystemPort();
+
+                    // Generate file not found response
+                    SearchOKResponse searchOKResponse = new SearchOKResponse();
+                    searchOKResponse.setQuery(searchRequest.getFileName());
+                    searchOKResponse.setTimestamp(searchRequest.getTimestamp());
+                    searchOKResponse.setValue(0);
+                    searchOKResponse.setIpAddress(systemIpAddress);
+                    searchOKResponse.setPort(systemPort);
+                    searchOKResponse.setFileNames(new ArrayList<>());
+
+                    // Create search ok endpoint to the target client
+                    SearchOKEndpoint searchOKEndpoint = new SearchOKEndpoint(searchRequest.getIpAddress(),
+                            searchRequest.getPort());
+
+                    // Send response to the client
+                    response = communityConnection.searchOK(searchOKResponse, searchOKEndpoint);
+                    break;
+                }
             }
         }
 

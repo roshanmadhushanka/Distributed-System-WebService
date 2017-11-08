@@ -7,7 +7,13 @@ import home.message.request.SearchRequest;
 import home.message.response.JoinOKResponse;
 import home.message.response.LeaveOKResponse;
 import home.message.response.SearchOKResponse;
+import home.model.Neighbour;
+import home.system.Configuration;
+import home.table.FileToLocationTable;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CommunityConnection {
     /*

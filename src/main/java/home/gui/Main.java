@@ -485,9 +485,14 @@ public class Main extends javax.swing.JFrame {
     private void btnDepartureActionPerformed(java.awt.event.ActionEvent evt) {
         String response = null;
 
+        // Load system communication configurations
+        String systemIPAddress = Configuration.getSystemIPAddress();
+        int systemPort = Configuration.getSystemPort();
+        String systemName = Configuration.getSystemName();
+
         // Generate message
-        BSUnRegRequest bsUnRegRequest = new BSUnRegRequest(Configuration.getBsIpAddress(), Configuration.getSystemPort(),
-                Configuration.getSystemName());
+        BSUnRegRequest bsUnRegRequest = new BSUnRegRequest(systemIPAddress, systemPort,
+                systemName);
 
         // Create connection to the bootstrap server
         BootstrapConnection bootstrapConnection = new BootstrapConnection();
