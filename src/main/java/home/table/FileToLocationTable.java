@@ -8,13 +8,23 @@ import java.util.List;
 public class FileToLocationTable {
     private static HashMap<String, List<Neighbour>> fileToLocation = new HashMap<>();
 
+    private static boolean hasNeighbour(String fileName, Neighbour neighbour){
+        List<Neighbour> neighbours = fileToLocation.get(fileName);
+        for(Neighbour n: neighbours) {
+            if(n.getIpAddress().equals(neighbour.getIpAddress()) && n.getPort() == neighbour.getPort()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void add(String fileName, Neighbour neighbour) {
         /*
             Add location to a given file
          */
 
         if(fileToLocation.containsKey(fileName)) {
-            if(!fileToLocation.get(fileName).contains(neighbour)) {
+            if(!hasNeighbour(fileName, neighbour)) {
                 fileToLocation.get(fileName).add(neighbour);
             }
         } else {

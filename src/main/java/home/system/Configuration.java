@@ -72,25 +72,23 @@ public class Configuration {
         encryptor.setPassword("jasypt");
 
         Properties props = new EncryptableProperties(encryptor);
-
-//        // Load properties
-//        props.load(new FileInputStream(System.getProperty("user.dir") + "/src/main/resources/" +
+//        // Build configurations
+//        props.load(new FileInputStream(System.getProperty("user.dir") + "/" +
 //                "application.properties"));
 
-        // Build configurations
-        props.load(new FileInputStream(System.getProperty("user.dir") + "/" +
+        // Load properties
+        props.load(new FileInputStream(System.getProperty("user.dir") + "/src/main/resources/" +
                 "application.properties"));
 
         // Set properties
         setSystemName(props.getProperty("server.name"));
-        setSystemIPAddress(props.getProperty("server.host"));
-
-//        String host = InetAddress.getLocalHost().getHostAddress();
-//        setSystemIPAddress(host);
-
+        setSystemIPAddress(props.getProperty("server.ipAddress"));
+        System.out.println(props.getProperty("server.port"));
         setSystemPort(Integer.parseInt(props.getProperty("server.port")));
         setBsIpAddress(props.getProperty("bootstrap.host"));
         setBsPort(Integer.parseInt(props.getProperty("bootstrap.port")));
+
+
 
         // Set files in file table
         String[] files = props.getProperty("files").split(";");

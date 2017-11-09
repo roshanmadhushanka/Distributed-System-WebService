@@ -124,6 +124,7 @@ public class MessageParser {
 
         // Send request to the community
         CommunityConnection communityConnection = new CommunityConnection();
+
         communityConnection.join(joinRequest, joinEndpoint);
     }
 
@@ -147,6 +148,8 @@ public class MessageParser {
 
         // Send request to the community
         CommunityConnection communityConnection = new CommunityConnection();
+
+        communityConnection.join(joinRequest, joinEndpointB);
         communityConnection.join(joinRequest, joinEndpointA);
         communityConnection.join(joinRequest, joinEndpointB);
     }
@@ -158,14 +161,16 @@ public class MessageParser {
 
         // Load system communication configurations
         String systemIPAddress = Configuration.getSystemIPAddress();
-        int systemPort = Configuration.getBsPort();
+        int systemPort = Configuration.getSystemPort();
 
         // Generate leave request
         LeaveRequest leaveRequest = new LeaveRequest(systemIPAddress, systemPort);
 
         // Gracefully departure from each node
         CommunityConnection communityConnection = new CommunityConnection();
+
         List<Neighbour> neighbours = Neighbour.getNeighbours();
+
         for(Neighbour n: neighbours) {
 
             // Generate leave endpoint
@@ -173,9 +178,6 @@ public class MessageParser {
 
             // Send leave request to the community
             communityConnection.leave(leaveRequest, leaveEndpoint);
-
-            // Remove neighbour from the circle
-            Neighbour.removeNeighbour(n);
         }
     }
 }

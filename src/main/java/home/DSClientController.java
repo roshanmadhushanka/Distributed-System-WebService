@@ -25,9 +25,7 @@ import org.bson.Document;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -94,7 +92,7 @@ public class DSClientController {
         String response = null;
 
         // Generate message
-        BSUnRegRequest bsUnRegRequest = new BSUnRegRequest(Configuration.getBsIpAddress(), Configuration.getSystemPort(),
+        BSUnRegRequest bsUnRegRequest = new BSUnRegRequest(Configuration.getSystemIPAddress(), Configuration.getSystemPort(),
                 Configuration.getSystemName());
 
         // Create connection to the bootstrap server
@@ -145,7 +143,9 @@ public class DSClientController {
 
         // GUI
         Main.getForm().appendTerminal(joinRequest.toString());
-        Main.getForm().appendNeighbour(neighbour);
+        Main.getForm().updateNeighbours();
+
+        response = "ACK";
 
         return new ResponseEntity(response, HttpStatus.OK);
     }
@@ -227,13 +227,11 @@ public class DSClientController {
             // Establish connection with the community
             CommunityConnection communityConnection = new CommunityConnection();
 
+            --hops;
             boolean hasNeighbours = false;
-            for(Neighbour neighbour: neighbours) {
-                if (hops > 0) {
-                    // Forward search request to neighbours within the circle
 
-                    // Update hops count
-                    --hops;
+            if(hops > 0) {
+                for(Neighbour neighbour: neighbours) {
                     forwardRequest.setHops(hops);
 
                     // Create an endpoint to the target neighbour
@@ -241,31 +239,56 @@ public class DSClientController {
                             neighbour.getPort());
 
                     response = communityConnection.search(forwardRequest, searchEndpoint);
-                    System.out.println("search" + response);
-                } else {
-                    // Hops count limit exceeded, send file not found message
 
-                    // Load system communication configurations
-                    String systemIpAddress = Configuration.getSystemIPAddress();
-                    int systemPort = Configuration.getSystemPort();
-
-                    // Generate file not found response
-                    SearchOKResponse searchOKResponse = new SearchOKResponse();
-                    searchOKResponse.setQuery(searchRequest.getFileName());
-                    searchOKResponse.setTimestamp(searchRequest.getTimestamp());
-                    searchOKResponse.setValue(0);
-                    searchOKResponse.setIpAddress(systemIpAddress);
-                    searchOKResponse.setPort(systemPort);
-                    searchOKResponse.setFileNames(new ArrayList<>());
-
-                    // Create search ok endpoint to the target client
-                    SearchOKEndpoint searchOKEndpoint = new SearchOKEndpoint(searchRequest.getIpAddress(),
-                            searchRequest.getPort());
-
-                    // Send response to the client
-                    response = communityConnection.searchOK(searchOKResponse, searchOKEndpoint);
-                    break;
+                    if(response != null && response.equals("ACK")) {
+                        hasNeighbours = true;
+                    }
                 }
+            } else {
+                // Hops count limit exceeded, send file not found message
+
+                // Load system communication configurations
+                String systemIpAddress = Configuration.getSystemIPAddress();
+                int systemPort = Configuration.getSystemPort();
+
+                // Generate file not found response
+                SearchOKResponse searchOKResponse = new SearchOKResponse();
+                searchOKResponse.setQuery(searchRequest.getFileName());
+                searchOKResponse.setTimestamp(searchRequest.getTimestamp());
+                searchOKResponse.setValue(0);
+                searchOKResponse.setIpAddress(systemIpAddress);
+                searchOKResponse.setPort(systemPort);
+                searchOKResponse.setFileNames(new ArrayList<>());
+
+                // Create search ok endpoint to the target client
+                SearchOKEndpoint searchOKEndpoint = new SearchOKEndpoint(searchRequest.getIpAddress(),
+                        searchRequest.getPort());
+
+                // Send response to the client
+                response = communityConnection.searchOK(searchOKResponse, searchOKEndpoint);
+            }
+
+            if(!hasNeighbours) {
+                // Has no neighbours
+                Main.getForm().appendTerminal("No neighbours :(");
+
+                // Generate message
+                BSUnRegRequest bsUnRegRequest = new BSUnRegRequest(Configuration.getSystemIPAddress(), Configuration.getSystemPort(),
+                        Configuration.getSystemName());
+
+                // Generate reg message
+                BSRegRequest bsRegRequest = new BSRegRequest(Configuration.getSystemIPAddress(), Configuration.getSystemPort(),
+                        Configuration.getSystemName());
+
+                // Create connection to the bootstrap server
+                BootstrapConnection bootstrapConnection = new BootstrapConnection();
+
+                // Send reg message and waiting for response
+                response = bootstrapConnection.send(bsRegRequest.getMessage());
+
+                // Send to message parser
+                MessageParser.responseParser(response);
+
             }
         }
 
@@ -302,7 +325,7 @@ public class DSClientController {
                 leaveRequest.getTimestamp());
 
         // Create an endpoint to the receiver
-        LeaveOKEndpoint leaveOKEndpoint = new LeaveOKEndpoint(leaveOKResponse.getIpAddress(), leaveOKResponse.getPort());
+        LeaveOKEndpoint leaveOKEndpoint = new LeaveOKEndpoint(leaveRequest.getIpAddress(), leaveRequest.getPort());
 
         // Establish connection with the community
         CommunityConnection communityConnection = new CommunityConnection();
@@ -310,10 +333,11 @@ public class DSClientController {
         // Send leave ok response to the target client
         communityConnection.leaveOK(leaveOKResponse, leaveOKEndpoint);
 
-        response = "ACK";
-
         // GUI
         Main.getForm().appendTerminal(leaveRequest.toString());
+        Main.getForm().updateNeighbours();
+
+        response = "ACK";
 
         return new ResponseEntity(response, HttpStatus.OK);
     }
@@ -350,7 +374,9 @@ public class DSClientController {
 
         // GUI
         Main.getForm().appendTerminal(joinOKResponse.toString());
-        Main.getForm().appendNeighbour(neighbour);
+        Main.getForm().updateNeighbours();
+
+        response = "ACK";
 
         return new ResponseEntity(HttpStatus.OK);
     }
@@ -405,6 +431,7 @@ public class DSClientController {
 
         // GUI
         Main.getForm().appendTerminal(leaveOKResponse.toString());
+        Main.getForm().updateNeighbours();
 
         return new ResponseEntity(HttpStatus.OK);
     }
@@ -516,49 +543,5 @@ public class DSClientController {
         }
 
         return new ResponseEntity<String>(response, HttpStatus.OK);
-    }
-
-    @CrossOrigin
-    @RequestMapping(value = "/initSearch/{file_name}", method = RequestMethod.GET)
-    public void initSearch(@PathVariable("file_name") String fileName) {
-        /*
-            Handle developer search request
-         */
-
-        List<String> files = FileTable.search(fileName);
-        if(files.size() == 0) {
-            // Load neighbours
-            List<Neighbour> neighbours = Neighbour.getNeighbours();
-
-            // Check file to locations for existing search results
-            if(FileToLocationTable.hasLocation(fileName)) {
-                for(Neighbour n: FileToLocationTable.getLocations(fileName)) {
-                    neighbours.add(0, n);
-                }
-            }
-
-            // Load system communication configurations
-            String systemIPAddress = Configuration.getSystemIPAddress();
-            int systemPort = Configuration.getSystemPort();
-
-            // Initiate search request
-            SearchRequest searchRequest = new SearchRequest(systemIPAddress, systemPort, fileName);
-
-            // Establish connection with the community
-            CommunityConnection communityConnection = new CommunityConnection();
-
-            for(Neighbour neighbour: neighbours) {
-                // Create an endpoint to the target neighbour
-                SearchEndpoint searchEndpoint = new SearchEndpoint(neighbour.getIpAddress(),
-                        neighbour.getPort());
-                try {
-                    communityConnection.search(searchRequest, searchEndpoint);
-                } catch (org.springframework.web.client.ResourceAccessException e) {
-
-                }
-            }
-        } else {
-            System.out.println("Files : " + Arrays.toString(files.toArray()));
-        }
     }
 }

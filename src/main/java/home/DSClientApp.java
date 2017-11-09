@@ -29,8 +29,8 @@ public class DSClientApp {
 //        RandomQueryGenerator randomQueryGenerator = new RandomQueryGenerator();
 //        randomQueryGenerator.start();
 
-        Main.getForm().setVisible(true);
 
+        Main.getForm().setVisible(true);
         SpringApplication.run(DSClientApp.class, args);
     }
 }

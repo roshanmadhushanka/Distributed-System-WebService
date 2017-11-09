@@ -17,7 +17,6 @@ import home.parser.MessageParser;
 import home.system.Configuration;
 import home.table.FileTable;
 import home.table.FileToLocationTable;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.util.Arrays;
@@ -56,7 +55,7 @@ public class Main extends javax.swing.JFrame {
 
         // Load system configurations
         updateSystemInfo(Configuration.getSystemName(),
-                Configuration.getBsIpAddress(),
+                Configuration.getSystemIPAddress(),
                 String.valueOf(Configuration.getSystemPort()));
 
         // Update files
@@ -76,8 +75,16 @@ public class Main extends javax.swing.JFrame {
         terminalListModel.addElement(message);
     }
 
-    public void appendNeighbour(Neighbour neighbour) {
+    private void appendNeighbour(Neighbour neighbour) {
         neighbourListModel.addElement(neighbour.toString());
+    }
+
+    public void updateNeighbours() {
+        DefaultListModel listModel = (DefaultListModel) lstNeighbours.getModel();
+        listModel.removeAllElements();
+        for(Neighbour neighbour: Neighbour.getNeighbours()) {
+            appendNeighbour(neighbour);
+        }
     }
 
     public void updateSystemInfo(String name, String ipAddress, String port) {
@@ -88,6 +95,7 @@ public class Main extends javax.swing.JFrame {
 
     public void updateFileDestinations() {
         DefaultTableModel fileDestinationTableModel = (DefaultTableModel) tblFileDestinations.getModel();
+
         fileDestinationTableModel.setRowCount(0);
 
         HashMap<String, List<Neighbour>> fileToLocation = FileToLocationTable.getFileToLocation();

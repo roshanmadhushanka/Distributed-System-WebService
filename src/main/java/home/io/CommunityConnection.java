@@ -34,6 +34,7 @@ public class CommunityConnection {
         try {
             response = restTemplate.postForObject(joinEndpoint.getEndpoint(), joinRequest, String.class);
         } catch (org.springframework.web.client.ResourceAccessException e) {
+            System.out.println("Timeout");
             response = "Error";
         }
 

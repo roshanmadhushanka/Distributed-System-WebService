@@ -3,6 +3,7 @@ package home.model;
 import home.api.Endpoint;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class Neighbour {
@@ -31,7 +32,7 @@ public class Neighbour {
         return port;
     }
 
-    public static void addNeighbour(Neighbour neighbour) {
+    public static synchronized void addNeighbour(Neighbour neighbour) {
         /*
             Add neighbour to the circle
          */
@@ -41,7 +42,7 @@ public class Neighbour {
         }
     }
 
-    public static void removeNeighbour(Neighbour neighbour) {
+    public static synchronized void removeNeighbour(Neighbour neighbour) {
         /*
             Remove neighbour from the circle
          */
@@ -53,7 +54,10 @@ public class Neighbour {
             }
             i++;
         }
-        neighbours.remove(i);
+
+        if(i<neighbours.size()) {
+            neighbours.remove(i);
+        }
     }
 
     public static List<Neighbour> getNeighbours() {
@@ -61,7 +65,7 @@ public class Neighbour {
             Get neighbours in the circle
         */
 
-        return neighbours;
+        return new ArrayList<>(neighbours);
     }
 
     public static boolean hasNeighbour(Neighbour neighbour) {
