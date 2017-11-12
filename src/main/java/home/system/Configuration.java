@@ -72,13 +72,13 @@ public class Configuration {
         encryptor.setPassword("jasypt");
 
         Properties props = new EncryptableProperties(encryptor);
-//        // Build configurations
-//        props.load(new FileInputStream(System.getProperty("user.dir") + "/" +
-//                "application.properties"));
-
-        // Load properties
-        props.load(new FileInputStream(System.getProperty("user.dir") + "/src/main/resources/" +
+        // Build configurations
+        props.load(new FileInputStream(System.getProperty("user.dir") + "/" +
                 "application.properties"));
+
+//        // Load properties
+//        props.load(new FileInputStream(System.getProperty("user.dir") + "/src/main/resources/" +
+//                "application.properties"));
 
         // Set properties
         setSystemName(props.getProperty("server.name"));

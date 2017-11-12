@@ -8,6 +8,7 @@ package home.gui;
 import home.api.SearchEndpoint;
 import home.io.BootstrapConnection;
 import home.io.CommunityConnection;
+import home.io.Connection;
 import home.message.request.BSRegRequest;
 import home.message.request.BSUnRegRequest;
 import home.message.request.SearchRequest;
@@ -531,14 +532,15 @@ public class Main extends javax.swing.JFrame {
         SearchRequest searchRequest = new SearchRequest(systemIPAddress, systemPort, fileName);
 
         // Establish connection with the community
-        CommunityConnection communityConnection = new CommunityConnection();
+        Connection connection = new Connection(3);
 
         for(Neighbour neighbour: neighbours) {
             // Create an endpoint to the target neighbour
             SearchEndpoint searchEndpoint = new SearchEndpoint(neighbour.getIpAddress(),
                     neighbour.getPort());
             try {
-                communityConnection.search(searchRequest, searchEndpoint);
+
+                connection.send(searchRequest, searchEndpoint);
             } catch (org.springframework.web.client.ResourceAccessException e) {
 
             }

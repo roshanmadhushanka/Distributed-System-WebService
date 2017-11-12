@@ -22,6 +22,7 @@
 /Users/roshanalwis/Documents/Projects/Java/dsservice/src/main/java/home/DSClientApp.java
 /Users/roshanalwis/Documents/Projects/Java/dsservice/src/main/java/home/message/response/JoinOKResponse.java
 /Users/roshanalwis/Documents/Projects/Java/dsservice/src/main/java/home/model/Neighbour.java
+/Users/roshanalwis/Documents/Projects/Java/dsservice/src/main/java/home/io/Connection.java
 /Users/roshanalwis/Documents/Projects/Java/dsservice/src/main/java/home/table/SearchResponseTable.java
 /Users/roshanalwis/Documents/Projects/Java/dsservice/src/main/java/home/message/request/LeaveRequest.java
 /Users/roshanalwis/Documents/Projects/Java/dsservice/src/main/java/home/api/SearchEndpoint.java

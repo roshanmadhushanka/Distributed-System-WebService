@@ -10,7 +10,9 @@ home/api/SearchEndpoint.class
 home/gui/Main$2.class
 home/io/CommunityConnection.class
 home/message/request/DownloadRequest.class
+home/io/Connection$2.class
 home/message/request/LeaveRequest.class
+home/io/Connection.class
 home/message/request/JoinRequest.class
 home/api/LeaveEndpoint.class
 home/table/SearchResponseTable.class
@@ -34,5 +36,6 @@ home/gui/Main$4.class
 home/message/request/BSUnRegRequest.class
 home/DSClientApp.class
 home/table/FileTable.class
+home/io/Connection$1.class
 home/message/response/JoinOKResponse.class
 home/simulation/RandomQueryGenerator.class

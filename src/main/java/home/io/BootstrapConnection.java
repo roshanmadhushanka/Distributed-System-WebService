@@ -46,7 +46,7 @@ public class BootstrapConnection {
         try {
             // Send packet
             socket = new DatagramSocket();
-            socket.setSoTimeout(10000);
+            socket.setSoTimeout(2000);
             socket.send(sendPacket);
 
             // Receive data
@@ -60,7 +60,6 @@ public class BootstrapConnection {
         } catch (SocketException e) {
             System.err.println("Socket exception: Connection.class send");
         } catch (IOException e) {
-            e.printStackTrace();
             System.err.println("IO exception: Connection.class send");
         }
 

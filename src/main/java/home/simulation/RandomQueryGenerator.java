@@ -2,6 +2,7 @@ package home.simulation;
 
 import home.api.SearchEndpoint;
 import home.io.CommunityConnection;
+import home.io.Connection;
 import home.message.request.SearchRequest;
 import home.model.Neighbour;
 import home.system.Configuration;
@@ -39,14 +40,14 @@ public class RandomQueryGenerator extends Thread {
             SearchRequest searchRequest = new SearchRequest(systemIPAddress, systemPort, fileName);
 
             // Establish connection with the community
-            CommunityConnection communityConnection = new CommunityConnection();
+            Connection connection = new Connection(3);
 
             for(Neighbour neighbour: neighbours) {
                 // Create an endpoint to the target neighbour
                 SearchEndpoint searchEndpoint = new SearchEndpoint(neighbour.getIpAddress(),
                         neighbour.getPort());
 
-                communityConnection.search(searchRequest, searchEndpoint);
+                connection.send(searchRequest, searchEndpoint);
                 System.out.println("> Search");
                 System.out.println("--------");
                 System.out.println(searchRequest.toString());

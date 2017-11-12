@@ -4,6 +4,7 @@ import home.api.JoinEndpoint;
 import home.api.LeaveEndpoint;
 import home.gui.Main;
 import home.io.CommunityConnection;
+import home.io.Connection;
 import home.message.request.JoinRequest;
 import home.message.request.LeaveRequest;
 import home.model.Neighbour;
@@ -123,9 +124,9 @@ public class MessageParser {
         JoinEndpoint joinEndpoint = new JoinEndpoint(neighbour.getIpAddress(), neighbour.getPort());
 
         // Send request to the community
-        CommunityConnection communityConnection = new CommunityConnection();
+        Connection connection = new Connection(3);
 
-        communityConnection.join(joinRequest, joinEndpoint);
+        connection.send(joinRequest, joinEndpoint);
     }
 
     private static void register2Users(String[] message) {
@@ -147,11 +148,11 @@ public class MessageParser {
         JoinEndpoint joinEndpointB = new JoinEndpoint(neighbourB.getIpAddress(), neighbourB.getPort());
 
         // Send request to the community
-        CommunityConnection communityConnection = new CommunityConnection();
+        Connection connection = new Connection(3);
 
-        communityConnection.join(joinRequest, joinEndpointB);
-        communityConnection.join(joinRequest, joinEndpointA);
-        communityConnection.join(joinRequest, joinEndpointB);
+        connection.send(joinRequest, joinEndpointB);
+        connection.send(joinRequest, joinEndpointA);
+
     }
 
     private static void unregisterUser(String[] message) {
@@ -167,7 +168,7 @@ public class MessageParser {
         LeaveRequest leaveRequest = new LeaveRequest(systemIPAddress, systemPort);
 
         // Gracefully departure from each node
-        CommunityConnection communityConnection = new CommunityConnection();
+        Connection connection = new Connection(3);
 
         List<Neighbour> neighbours = Neighbour.getNeighbours();
 
@@ -177,7 +178,7 @@ public class MessageParser {
             LeaveEndpoint leaveEndpoint = new LeaveEndpoint(n.getIpAddress(), n.getPort());
 
             // Send leave request to the community
-            communityConnection.leave(leaveRequest, leaveEndpoint);
+            connection.send(leaveRequest, leaveEndpoint);
         }
     }
 }

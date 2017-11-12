@@ -11,6 +11,7 @@ import home.buffers.SearchBuffer;
 import home.gui.Main;
 import home.io.BootstrapConnection;
 import home.io.CommunityConnection;
+import home.io.Connection;
 import home.message.request.*;
 import home.message.response.JoinOKResponse;
 import home.message.response.LeaveOKResponse;
@@ -32,6 +33,7 @@ import java.util.List;
 public class DSClientController {
 
     private boolean debug = true;
+    private int maxTimeout = 3;
 
     @CrossOrigin
     @RequestMapping(value = "/pulse", method = RequestMethod.GET)
@@ -136,10 +138,10 @@ public class DSClientController {
         JoinOKEndpoint joinOKEndpoint = new JoinOKEndpoint(joinRequest.getIpAddress(), joinRequest.getPort());
 
         // Establish connection with the community
-        CommunityConnection communityConnection = new CommunityConnection();
+        Connection connection = new Connection(maxTimeout);
 
         // Send join ok response to the target client
-        response = communityConnection.joinOK(joinOKResponse, joinOKEndpoint);
+        connection.send(joinOKResponse, joinOKEndpoint);
 
         // GUI
         Main.getForm().appendTerminal(joinRequest.toString());
@@ -190,14 +192,14 @@ public class DSClientController {
                 searchOKResponse.setTimestamp(searchRequest.getTimestamp());
 
                 // Establish connection with the community
-                CommunityConnection communityConnection = new CommunityConnection();
+                Connection connection = new Connection(maxTimeout);
 
                 // Create search ok endpoint to the target client
                 SearchOKEndpoint searchOKEndpoint = new SearchOKEndpoint(searchRequest.getIpAddress(),
                         searchRequest.getPort());
 
                 // Send response to the client
-                response = communityConnection.searchOK(searchOKResponse, searchOKEndpoint);
+                connection.send(searchOKResponse, searchOKEndpoint);
             }
 
             // File is not available int the system
@@ -238,11 +240,8 @@ public class DSClientController {
                     SearchEndpoint searchEndpoint = new SearchEndpoint(neighbour.getIpAddress(),
                             neighbour.getPort());
 
-                    response = communityConnection.search(forwardRequest, searchEndpoint);
-
-                    if(response != null && response.equals("ACK")) {
-                        hasNeighbours = true;
-                    }
+                    Connection connection = new Connection(maxTimeout);
+                    connection.send(forwardRequest, searchEndpoint);
                 }
             } else {
                 // Hops count limit exceeded, send file not found message
@@ -264,31 +263,8 @@ public class DSClientController {
                 SearchOKEndpoint searchOKEndpoint = new SearchOKEndpoint(searchRequest.getIpAddress(),
                         searchRequest.getPort());
 
-                // Send response to the client
-                response = communityConnection.searchOK(searchOKResponse, searchOKEndpoint);
-            }
-
-            if(!hasNeighbours) {
-                // Has no neighbours
-                Main.getForm().appendTerminal("No neighbours :(");
-
-                // Generate message
-                BSUnRegRequest bsUnRegRequest = new BSUnRegRequest(Configuration.getSystemIPAddress(), Configuration.getSystemPort(),
-                        Configuration.getSystemName());
-
-                // Generate reg message
-                BSRegRequest bsRegRequest = new BSRegRequest(Configuration.getSystemIPAddress(), Configuration.getSystemPort(),
-                        Configuration.getSystemName());
-
-                // Create connection to the bootstrap server
-                BootstrapConnection bootstrapConnection = new BootstrapConnection();
-
-                // Send reg message and waiting for response
-                response = bootstrapConnection.send(bsRegRequest.getMessage());
-
-                // Send to message parser
-                MessageParser.responseParser(response);
-
+                Connection connection = new Connection(maxTimeout);
+                connection.send(searchOKResponse, searchOKEndpoint);
             }
         }
 
@@ -328,10 +304,10 @@ public class DSClientController {
         LeaveOKEndpoint leaveOKEndpoint = new LeaveOKEndpoint(leaveRequest.getIpAddress(), leaveRequest.getPort());
 
         // Establish connection with the community
-        CommunityConnection communityConnection = new CommunityConnection();
+        Connection connection = new Connection(maxTimeout);
 
         // Send leave ok response to the target client
-        communityConnection.leaveOK(leaveOKResponse, leaveOKEndpoint);
+        connection.send(leaveOKResponse, leaveOKEndpoint);
 
         // GUI
         Main.getForm().appendTerminal(leaveRequest.toString());
