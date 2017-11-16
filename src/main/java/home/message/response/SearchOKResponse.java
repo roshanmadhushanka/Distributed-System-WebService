@@ -16,17 +16,19 @@ public class SearchOKResponse {
     private int value;
     private long timestamp;
     private String query;
+    private int hopsCount;
     private List<String> fileNames;
 
     public SearchOKResponse() {
     }
 
-    public SearchOKResponse(String ipAddress, int port, int value, long timestamp, String query, List<String> fileNames) {
+    public SearchOKResponse(String ipAddress, int port, int value, long timestamp, String query, int hopsCount, List<String> fileNames) {
         this.ipAddress = ipAddress;
         this.port = port;
         this.value = value;
         this.timestamp = timestamp;
         this.query = query;
+        this.hopsCount = hopsCount;
         this.fileNames = fileNames;
     }
 
@@ -76,6 +78,14 @@ public class SearchOKResponse {
 
     public void setFileNames(List<String> fileNames) {
         this.fileNames = fileNames;
+    }
+
+    public int getHopsCount() {
+        return hopsCount;
+    }
+
+    public void setHopsCount(int hopsCount) {
+        this.hopsCount = hopsCount;
     }
 
     @Override

@@ -18,6 +18,10 @@ import home.message.response.LeaveOKResponse;
 import home.message.response.SearchOKResponse;
 import home.model.Neighbour;
 import home.parser.MessageParser;
+import home.stat.JoinQueryStat;
+import home.stat.LeaveQueryStat;
+import home.stat.SearchQueryStat;
+import home.stat.Statistics;
 import home.system.Configuration;
 import home.table.FileTable;
 import home.table.FileToLocationTable;
@@ -26,6 +30,8 @@ import org.bson.Document;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -143,6 +149,10 @@ public class DSClientController {
         // Send join ok response to the target client
         connection.send(joinOKResponse, joinOKEndpoint);
 
+        // Stat - Begin
+        Statistics.incrementSentMessages();
+        // Stat - End
+
         // GUI
         Main.getForm().appendTerminal(joinRequest.toString());
         Main.getForm().updateNeighbours();
@@ -190,6 +200,7 @@ public class DSClientController {
                 searchOKResponse.setPort(systemPort);
                 searchOKResponse.setFileNames(fileList);
                 searchOKResponse.setTimestamp(searchRequest.getTimestamp());
+                searchOKResponse.setHopsCount(searchRequest.getHops());
 
                 // Establish connection with the community
                 Connection connection = new Connection(maxTimeout);
@@ -200,6 +211,10 @@ public class DSClientController {
 
                 // Send response to the client
                 connection.send(searchOKResponse, searchOKEndpoint);
+
+                // Stat - Begin
+                Statistics.incrementSentMessages();
+                // Stat - End
             }
 
             // File is not available int the system
@@ -241,7 +256,13 @@ public class DSClientController {
                             neighbour.getPort());
 
                     Connection connection = new Connection(maxTimeout);
+
+                    // Send search request to neighbours
                     connection.send(forwardRequest, searchEndpoint);
+
+                    // Stat - Begin
+                    Statistics.incrementSentMessages();
+                    // Stat - End
                 }
             } else {
                 // Hops count limit exceeded, send file not found message
@@ -258,13 +279,20 @@ public class DSClientController {
                 searchOKResponse.setIpAddress(systemIpAddress);
                 searchOKResponse.setPort(systemPort);
                 searchOKResponse.setFileNames(new ArrayList<>());
+                searchOKResponse.setHopsCount(hops);
 
                 // Create search ok endpoint to the target client
                 SearchOKEndpoint searchOKEndpoint = new SearchOKEndpoint(searchRequest.getIpAddress(),
                         searchRequest.getPort());
 
                 Connection connection = new Connection(maxTimeout);
+
+                // Send search not found to the sender
                 connection.send(searchOKResponse, searchOKEndpoint);
+
+                // Stat - Begin
+                Statistics.incrementSentMessages();
+                // Stat - End
             }
         }
 
@@ -309,6 +337,10 @@ public class DSClientController {
         // Send leave ok response to the target client
         connection.send(leaveOKResponse, leaveOKEndpoint);
 
+        // Stat - Begin
+        Statistics.incrementSentMessages();
+        // Stat - End
+
         // GUI
         Main.getForm().appendTerminal(leaveRequest.toString());
         Main.getForm().updateNeighbours();
@@ -339,6 +371,13 @@ public class DSClientController {
             Handle JoinOKResponse
          */
 
+        // Stat - Begin
+        Statistics.incrementReceivedMessages();
+        JoinQueryStat joinQueryStat = new JoinQueryStat();
+        joinQueryStat.setSentTime(joinOKResponse.getTimestamp());
+        joinQueryStat.setReceivedTime(new Timestamp(System.currentTimeMillis()).getTime());
+        // Stat - End
+
         if(debug) {
             System.out.println(joinOKResponse.toString());
         }
@@ -363,6 +402,14 @@ public class DSClientController {
         /*
             Handle SearchOKResponse
          */
+
+        // Stat - Begin
+        Statistics.incrementReceivedMessages();
+        SearchQueryStat searchQueryStat = new SearchQueryStat();
+        searchQueryStat.setHopsCount(searchOKResponse.getHopsCount());
+        searchQueryStat.setSentTime(searchOKResponse.getTimestamp());
+        searchQueryStat.setReceivedTime(new Timestamp(System.currentTimeMillis()).getTime());
+        // Stat - End
 
         if(debug) {
             System.out.println(searchOKResponse.toString());
@@ -397,6 +444,13 @@ public class DSClientController {
         /*
             Handle LeaveOKResponse
          */
+
+        // Stat - Begin
+        Statistics.incrementReceivedMessages();
+        LeaveQueryStat leaveQueryStat = new LeaveQueryStat();
+        leaveQueryStat.setSentTime(leaveOKResponse.getTimestamp());
+        leaveQueryStat.setReceivedTime(new Timestamp(System.currentTimeMillis()).getTime());
+        // Stat - End
 
         if(debug) {
             System.out.println(leaveOKResponse.toString());
