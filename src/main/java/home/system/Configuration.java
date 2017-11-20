@@ -20,10 +20,13 @@ public class Configuration {
     private static String systemIPAddress;
     private static int systemPort;
     private static String systemName;
+    private static String systemHost;
 
     // Bootstrap server info
     private static String bsIpAddress;
     private static int bsPort;
+
+    private static int maxHopCount;
 
 
     public static String getSystemIPAddress() {
@@ -66,12 +69,29 @@ public class Configuration {
         Configuration.bsPort = bsPort;
     }
 
+    public static String getSystemHost() {
+        return systemHost;
+    }
+
+    public static void setSystemHost(String systemHost) {
+        Configuration.systemHost = systemHost;
+    }
+
+    public static int getMaxHopCount() {
+        return maxHopCount;
+    }
+
+    public static void setMaxHopCount(int maxHopCount) {
+        Configuration.maxHopCount = maxHopCount;
+    }
+
     public static void loadConfigurations() throws IOException {
         // Setup encryptor to load encrypted content (password)
         StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
         encryptor.setPassword("jasypt");
 
         Properties props = new EncryptableProperties(encryptor);
+
         // Build configurations
         props.load(new FileInputStream(System.getProperty("user.dir") + "/" +
                 "application.properties"));
@@ -84,11 +104,11 @@ public class Configuration {
         setSystemName(props.getProperty("server.name"));
         setSystemIPAddress(props.getProperty("server.ipAddress"));
         System.out.println(props.getProperty("server.port"));
+        setSystemHost(props.getProperty("server.host"));
         setSystemPort(Integer.parseInt(props.getProperty("server.port")));
         setBsIpAddress(props.getProperty("bootstrap.host"));
         setBsPort(Integer.parseInt(props.getProperty("bootstrap.port")));
-
-
+        setMaxHopCount(Integer.parseInt(props.getProperty("maxHopCount")));
 
         // Set files in file table
         String[] files = props.getProperty("files").split(";");

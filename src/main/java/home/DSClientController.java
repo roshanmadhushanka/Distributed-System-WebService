@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -265,34 +266,34 @@ public class DSClientController {
                     // Stat - End
                 }
             } else {
-                // Hops count limit exceeded, send file not found message
-
-                // Load system communication configurations
-                String systemIpAddress = Configuration.getSystemIPAddress();
-                int systemPort = Configuration.getSystemPort();
-
-                // Generate file not found response
-                SearchOKResponse searchOKResponse = new SearchOKResponse();
-                searchOKResponse.setQuery(searchRequest.getFileName());
-                searchOKResponse.setTimestamp(searchRequest.getTimestamp());
-                searchOKResponse.setValue(0);
-                searchOKResponse.setIpAddress(systemIpAddress);
-                searchOKResponse.setPort(systemPort);
-                searchOKResponse.setFileNames(new ArrayList<>());
-                searchOKResponse.setHopsCount(hops);
-
-                // Create search ok endpoint to the target client
-                SearchOKEndpoint searchOKEndpoint = new SearchOKEndpoint(searchRequest.getIpAddress(),
-                        searchRequest.getPort());
-
-                Connection connection = new Connection(maxTimeout);
-
-                // Send search not found to the sender
-                connection.send(searchOKResponse, searchOKEndpoint);
-
-                // Stat - Begin
-                Statistics.incrementSentMessages();
-                // Stat - End
+//                // Hops count limit exceeded, send file not found message
+//
+//                // Load system communication configurations
+//                String systemIpAddress = Configuration.getSystemIPAddress();
+//                int systemPort = Configuration.getSystemPort();
+//
+//                // Generate file not found response
+//                SearchOKResponse searchOKResponse = new SearchOKResponse();
+//                searchOKResponse.setQuery(searchRequest.getFileName());
+//                searchOKResponse.setTimestamp(searchRequest.getTimestamp());
+//                searchOKResponse.setValue(0);
+//                searchOKResponse.setIpAddress(systemIpAddress);
+//                searchOKResponse.setPort(systemPort);
+//                searchOKResponse.setFileNames(new ArrayList<>());
+//                searchOKResponse.setHopsCount(hops);
+//
+//                // Create search ok endpoint to the target client
+//                SearchOKEndpoint searchOKEndpoint = new SearchOKEndpoint(searchRequest.getIpAddress(),
+//                        searchRequest.getPort());
+//
+//                Connection connection = new Connection(maxTimeout);
+//
+//                // Send search not found to the sender
+//                connection.send(searchOKResponse, searchOKEndpoint);
+//
+//                // Stat - Begin
+//                Statistics.incrementSentMessages();
+//                // Stat - End
             }
         }
 
@@ -376,6 +377,7 @@ public class DSClientController {
         JoinQueryStat joinQueryStat = new JoinQueryStat();
         joinQueryStat.setSentTime(joinOKResponse.getTimestamp());
         joinQueryStat.setReceivedTime(new Timestamp(System.currentTimeMillis()).getTime());
+        JoinQueryStat.append(joinQueryStat);
         // Stat - End
 
         if(debug) {
@@ -406,9 +408,12 @@ public class DSClientController {
         // Stat - Begin
         Statistics.incrementReceivedMessages();
         SearchQueryStat searchQueryStat = new SearchQueryStat();
+        searchQueryStat.setQuery(searchOKResponse.getQuery());
+        searchQueryStat.setFileName(Arrays.toString(searchOKResponse.getFileNames().toArray()));
         searchQueryStat.setHopsCount(searchOKResponse.getHopsCount());
         searchQueryStat.setSentTime(searchOKResponse.getTimestamp());
         searchQueryStat.setReceivedTime(new Timestamp(System.currentTimeMillis()).getTime());
+        SearchQueryStat.append(searchQueryStat);
         // Stat - End
 
         if(debug) {
@@ -450,6 +455,7 @@ public class DSClientController {
         LeaveQueryStat leaveQueryStat = new LeaveQueryStat();
         leaveQueryStat.setSentTime(leaveOKResponse.getTimestamp());
         leaveQueryStat.setReceivedTime(new Timestamp(System.currentTimeMillis()).getTime());
+        LeaveQueryStat.append(leaveQueryStat);
         // Stat - End
 
         if(debug) {
@@ -464,6 +470,97 @@ public class DSClientController {
         Main.getForm().updateNeighbours();
 
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/stat", method = RequestMethod.GET)
+    public ResponseEntity<String> stat() {
+        /*
+            Display statistical results
+         */
+
+        String response = null;
+
+        Document doc = Statistics.getStats();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            response = objectMapper.writeValueAsString(doc);
+        } catch (JsonProcessingException e) {
+
+        }
+
+        return new ResponseEntity<String>(response, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/simulate", method = RequestMethod.GET)
+    public ResponseEntity<String> simulate() {
+        String response = null;
+        String[] queries = new String[] {
+                "Twilight",
+                "Jack",
+                "American Idol",
+                "Happy Feet",
+                "Twilight saga",
+                "Happy Feet",
+                "Happy Feet",
+                "Feet",
+                "Happy Feet",
+                "Twilight",
+                "Windows",
+                "Happy Feet",
+                "Mission Impossible",
+                "Twilight",
+                "Windows 8",
+                "The",
+                "Happy",
+                "Windows 8",
+                "Happy Feet",
+                "Super Mario",
+                "Jack and Jill",
+                "Happy Feet",
+                "Impossible",
+                "Happy Feet",
+                "Turn Up The Music",
+                "Adventures of Tintin",
+                "Twilight saga",
+                "Happy Feet",
+                "Super Mario",
+                "American Pickers",
+                "Microsoft Office 2010",
+                "Twilight",
+                "Modern Family",
+                "Jack and Jill",
+                "Jill",
+                "Glee",
+                "The Vampire Diarie",
+                "King Arthur",
+                "Jack and Jill",
+                "King Arthur",
+                "Windows XP",
+                "Harry Potter",
+                "Feet",
+                "Kung Fu Panda",
+                "Lady Gaga",
+                "Gaga",
+                "Happy Feet",
+                "Twilight",
+                "Hacking",
+                "King"
+        };
+
+        for(int i=0; i<queries.length; i++) {
+            SearchRequest searchRequest = new SearchRequest();
+            searchRequest.setFileName(queries[i]);
+            searchRequest.setHops(5);
+            searchRequest.setTimestamp(new Timestamp(System.currentTimeMillis()).getTime());
+            searchRequest.setIpAddress(Configuration.getSystemIPAddress());
+            searchRequest.setPort(Configuration.getSystemPort());
+            search(searchRequest);
+        }
+
+        response = "Success";
+
+        return new ResponseEntity<String>(response, HttpStatus.OK);
     }
 
     @CrossOrigin

@@ -6,6 +6,8 @@
 package home.gui;
 
 import home.api.SearchEndpoint;
+import home.api.SimulateEndpoint;
+import home.api.StatEndpoint;
 import home.io.BootstrapConnection;
 import home.io.CommunityConnection;
 import home.io.Connection;
@@ -15,14 +17,25 @@ import home.message.request.SearchRequest;
 import home.message.response.SearchOKResponse;
 import home.model.Neighbour;
 import home.parser.MessageParser;
+import home.stat.JoinQueryStat;
+import home.stat.LeaveQueryStat;
+import home.stat.SearchQueryStat;
+import home.stat.Statistics;
 import home.system.Configuration;
 import home.table.FileTable;
 import home.table.FileToLocationTable;
+import org.bson.Document;
+import org.springframework.http.*;
+import org.springframework.web.client.RestTemplate;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.event.ActionEvent;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+
+import static org.springframework.http.HttpStatus.OK;
 
 /**
  *
@@ -81,8 +94,7 @@ public class Main extends javax.swing.JFrame {
     }
 
     public void updateNeighbours() {
-        DefaultListModel listModel = (DefaultListModel) lstNeighbours.getModel();
-        listModel.removeAllElements();
+        neighbourListModel.clear();
         for(Neighbour neighbour: Neighbour.getNeighbours()) {
             appendNeighbour(neighbour);
         }
@@ -99,13 +111,18 @@ public class Main extends javax.swing.JFrame {
 
         fileDestinationTableModel.setRowCount(0);
 
-        HashMap<String, List<Neighbour>> fileToLocation = FileToLocationTable.getFileToLocation();
-        for(String file: fileToLocation.keySet()) {
-            for(Neighbour neighbour: fileToLocation.get(file)) {
-                fileDestinationTableModel.addRow(new Object[]{file,
-                        Arrays.toString(new String[]{neighbour.getIpAddress(), String.valueOf(neighbour.getPort())})});
+        try {
+            HashMap<String, List<Neighbour>> fileToLocation = FileToLocationTable.getFileToLocation();
+            for(String file: fileToLocation.keySet()) {
+                for(Neighbour neighbour: fileToLocation.get(file)) {
+                    fileDestinationTableModel.addRow(new Object[]{file,
+                            Arrays.toString(new String[]{neighbour.getIpAddress(), String.valueOf(neighbour.getPort())})});
+                }
             }
+        } catch (Exception e) {
+
         }
+
     }
 
 
@@ -149,6 +166,7 @@ public class Main extends javax.swing.JFrame {
         jPanel6 = new javax.swing.JPanel();
         btnJoin = new javax.swing.JButton();
         btnDeparture = new javax.swing.JButton();
+        btnStat = new javax.swing.JButton();
         jPanel7 = new javax.swing.JPanel();
         txtSearch = new javax.swing.JTextField();
         btnSearch = new javax.swing.JButton();
@@ -310,6 +328,13 @@ public class Main extends javax.swing.JFrame {
             }
         });
 
+        btnStat.setText("Statistics");
+        btnStat.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnStatActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
         jPanel6Layout.setHorizontalGroup(
@@ -318,7 +343,8 @@ public class Main extends javax.swing.JFrame {
                                 .addContainerGap()
                                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                         .addComponent(btnJoin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(btnDeparture, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE))
+                                        .addComponent(btnDeparture, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
+                                        .addComponent(btnStat, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE))
                                 .addContainerGap())
         );
         jPanel6Layout.setVerticalGroup(
@@ -328,7 +354,10 @@ public class Main extends javax.swing.JFrame {
                                 .addComponent(btnJoin)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnDeparture)
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnStat)
                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+
         );
 
         jPanel7.setBorder(javax.swing.BorderFactory.createTitledBorder("Search"));
@@ -470,6 +499,15 @@ public class Main extends javax.swing.JFrame {
         pack();
     }// </editor-fold>
 
+    private void btnStatActionPerformed(ActionEvent evt) {
+        Document doc = Statistics.getStats();
+        appendTerminal("Summary");
+        appendTerminal("=======");
+        for(String key: doc.keySet()){
+            appendTerminal(key + "\t" + String.valueOf(doc.get(key)));
+        }
+    }
+
     private void btnJoinActionPerformed(java.awt.event.ActionEvent evt) {
         String response = null;
 
@@ -547,19 +585,32 @@ public class Main extends javax.swing.JFrame {
         }
     }
 
-    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {
-        String fileName = txtSearch.getText();
+    public void searchSimulate() {
+        JoinQueryStat.clear();
+        LeaveQueryStat.clear();
+        SearchQueryStat.clear();
+        Statistics.clear();
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        SimulateEndpoint simulateEndpoint = new SimulateEndpoint(Configuration.getSystemIPAddress(), Configuration.getSystemPort());
+        ResponseEntity<String> response = restTemplate.getForEntity(simulateEndpoint.getEndpoint(), String.class);
+    }
 
-        List<String> files = FileTable.search(fileName);
-        if(files.size() == 0) {
-            search(fileName);
-        } else {
-            if (JOptionPane.showConfirmDialog(null, "Following file(s) already in your system "
-                            + Arrays.toString(files.toArray()) + "\n Do you wish to continue?", "Confirm",
-                    JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                search(fileName);
-            }
-        }
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {
+//        String fileName = txtSearch.getText();
+//
+//        List<String> files = FileTable.search(fileName);
+//        if(files.size() == 0) {
+//            search(fileName);
+//        } else {
+//            if (JOptionPane.showConfirmDialog(null, "Following file(s) already in your system "
+//                            + Arrays.toString(files.toArray()) + "\n Do you wish to continue?", "Confirm",
+//                    JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+//                search(fileName);
+//            }
+//        }
+        searchSimulate();
     }
 
     /**
@@ -601,6 +652,7 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JButton btnDeparture;
     private javax.swing.JButton btnJoin;
     private javax.swing.JButton btnSearch;
+    private javax.swing.JButton btnStat;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

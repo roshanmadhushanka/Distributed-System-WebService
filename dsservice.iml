@@ -64,6 +64,10 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.springframework:spring-test:4.3.10.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.9" level="project" />
     <orderEntry type="library" name="Maven: org.mongodb:bson:3.5.0" level="project" />
+    <orderEntry type="library" name="Maven: com.massisframework:j-text-utils:0.3.4" level="project" />
+    <orderEntry type="library" name="Maven: com.google.guava:guava:21.0" level="project" />
+    <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.6" level="project" />
+    <orderEntry type="library" name="Maven: au.com.bytecode:opencsv:2.4" level="project" />
     <orderEntry type="library" name="Maven: io.socket:socket.io-client:1.0.0" level="project" />
     <orderEntry type="library" name="Maven: io.socket:engine.io-client:1.0.0" level="project" />
     <orderEntry type="library" name="Maven: com.squareup.okhttp3:okhttp:3.8.1" level="project" />
